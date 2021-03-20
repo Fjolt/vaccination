@@ -48,13 +48,14 @@ Adds free Wednesday through 2:30 AM to 8:30 PM.
 “RegistrationnID | PenguinID | Name | Lastname | PenguinPriority”
 “PRINTFREECENTERS District” - lists all center IDs from the area that still have some free vaccines, sorted by CenterID.
 
-"PRINCIPLES ARG ARG…." - a query that lists all penguins sorted by PenguinID and then Day that meet ARG conditions. ARG can take several forms:
+"PRINTVALIDTIMES ARG ARG…." - a query that lists all penguins sorted by PenguinID and then Day that meet ARG conditions. ARG can take several forms:
 
 "ID PenguinID" - lists all penguin times.
 “ID PenguinID DAY DAYNUMBER” - lists when a penguin can on a given day of the week.
 "DAY DAYNUMBER" - lists all penguins that can on a given day.
 “DAY DAYNUMBER HH MM HH MM” - lists all penguins that can on a given day of the week, during the entire time period from the arguments.
-Listings will be in the form "PenguinID | Day | From | To". Be especially careful not to duplicate rows in your listing. Now let's demonstrate the query “PRINTVALIDTIMES ID 0 ID 1 DAY 0 DAY 6 DAY 4 8 22 15 38” the query will print:
+Listings will be in the form "PenguinID | Day | From | To". Be especially careful not to duplicate rows in your listing. 
+Now let's demonstrate the query “PRINTVALIDTIMES ID 0 ID 1 DAY 0 DAY 6 DAY 4 8 22 15 38” the query will print:
 
 all about the penguin with ID 0.
 times on Monday for a penguin with ID 1.
