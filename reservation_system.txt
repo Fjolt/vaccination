@@ -1,0 +1,128 @@
+SIMPLE QUESTIONS
+“CREATEPENGUIN PenguinID FirstName LastName YYYY-MM-DD District VaccineNumber Medic” - query to add a penguin to the database, in which:
+
+The YYYY MM DD is converted to the desired form.
+If the penguin is older than 30 years (year = 365 days) or has a date of birth after the currentDate, nothing will change in the database.
+The ranking priority is calculated according to the following criteria:
+Penguins with a larger VaccineNumber take precedence.
+If the value of the parameter medic = 1 (penguin is medic) then it takes precedence over all non-medic penguins.
+Penguins older than oldAge have higher priority than younger penguins.
+Each priority level is assigned a number from 1 to N where N is the highest priority (N = VaccinationLimit * 2 (medic / nonmedic) * 2 (old / not old)).
+“CREATECENTER CenterID District HH ​​MM HH MM FreeVaccines” - a new center will be added to the query. The first HH MM represents WorkFrom and the second WorkTill.
+
+“REGISTERPENGUIN PenguinID ARG1 ARG2” - a query that adds Penguin to WaitingList and sets when it is able to go vaccinated.
+
+If the penguin has VaccineNumber> = vaccinationsLimit, then the operation will do nothing.
+Penguin's RegistrationID is generated depending on how many in total it is registered.
+ARG1 can take several forms:
+"ALL" - all centers currently open in its District will be added to the penguin ValidCenters.
+“CENTERS ID ID ID…. ID ”- the keyword centers and behind it all the centers he is willing to go to (if there is none, then take it as“ ALL ”).
+ARG2 can also take several forms:
+"ALWAYS" - can at any time.
+“DAY DAYNUMBER” - can all day DAY (eg “DAY 0 DAY 4” - penguin has time all day Monday and Friday).
+“DAY DAYNUMBER HH MM HH MM” (eg “DAY 0 1 0 19 30 DAY 1 DAY 4 16 0 20 0” - the penguin can on Monday from 1AM to 7:30 PM, all Tuesday and Friday from 4PM to 8PM).
+In CENTERS arguments, centers will not be repeated but may not exist. In DAY arguments, days will not be repeated.
+
+“CHANGEREGISTRATIONCENTERS PenguinID ID…. ID ”- the query changes the centers that suit the penguin.
+
+Unique Positive Argument ID - Adds centers with an ID among its ValidCenters.
+Unique Negative ID Argument - Removes centers with an ID from its ValidCenters.
+If the penguin should be left without a possible center, it will return the last one removed.
+As an example, penguin has registered centers in the system with ID 1 2 3. The query “CHANGEREGISTRATIONCENTERS -1 -2 -3” will do:
+
+Removes 1, 2 from its valid centers.
+It does not remove 3, otherwise it would have no valid Center.
+“CHANGEREGISTRATIONTIMES PenguinID ARG ARG…” - the query changes the times that suit the penguin. ARG can take several forms:
+
+"ALWAYS" - the penguin is always free.
+"DAY DAYNUMBER" - can all day.
+“DAY DAYNUMBER NOT” - cannot on a given day.
+“DAY DAYNUMBER HH MM HH MM” - changes the times of the day.
+Let's try to demonstrate the change of the example from REGISTERPENGUIN. Question “CHANGEREGISTRATIONTIMES 1 DAY 0 DAY 1 NOT DAY 2 2 30 20 30” penguins with ID = 1:
+
+Changes Monday to time from 0AM to 11:59 PM ~ 23:59.
+Removes Tuesday from the database.
+Adds free Wednesday through 2:30 AM to 8:30 PM.
+“PRINTREGISTERED N” - Lists the first N registered penguins sorted by RegistrationID in the form:
+
+“RegistrationnID | PenguinID | Name | Lastname | PenguinPriority”
+“PRINTFREECENTERS District” - lists all center IDs from the area that still have some free vaccines, sorted by CenterID.
+
+"PRINTVALIDTIMES ARG ARG…." - a query that lists all penguins sorted by PenguinID and then Day that meet ARG conditions. ARG can take several forms:
+
+"ID PenguinID" - lists all penguin times.
+“ID PenguinID DAY DAYNUMBER” - lists when a penguin can on a given day of the week.
+"DAY DAYNUMBER" - lists all penguins that can on a given day.
+“DAY DAYNUMBER HH MM HH MM” - lists all penguins that can on a given day of the week, during the entire time period from the arguments.
+Listings will be in the form "PenguinID | Day | From | To". Be especially careful not to duplicate rows in your listing. 
+Now let's demonstrate the query “PRINTVALIDTIMES ID 0 ID 1 DAY 0 DAY 6 DAY 4 8 22 15 38” the query will print:
+
+all about the penguin with ID 0.
+times on Monday for a penguin with ID 1.
+all penguins who have time on Sunday.
+all penguins who have time on Friday, from 8:22 AM to 15:38 PM.
+MORE COMPLEX QUESTIONS
+The second part will be a real implementation of the vaccination system. Only solve it if you are sure that all simple questions work for you.
+
+MAIN FUNCTION OF THE VACCINATION SYSTEM
+For simplicity, the system will work so that every night at half past night, it will receive an update on how many new vaccines have arrived, which center. This will be ensured by the query “ENDDAY CenterID Count …… .. CenterID Count” in which:
+The system updates freeVaccines in the mentioned centers
+Subsequently, the system logs all penguins vaccinated that day in the vaccinationLog table.
+Removes the penguins you logged from the Timetable and each of them increments a VaccineNumber.
+If one of the penguins has reached vaccinationsLimit, the system will print “Name LastName with ID: PenguinID is fully vaccinated !!”, and will delete their data from ValidCenters and ValidTimes.
+Subsequently, the system logs all penguins vaccinated that day in the vaccinationLog table.
+Removes the penguins you logged from the Timetable and each of them increments a VaccineNumber.
+If one of the penguins has reached vaccinationsLimit, the system will print “Name LastName with ID: PenguinID is fully vaccinated !!”, and will delete their data from ValidCenters and ValidTimes.
+Subsequently, the system goes through all the centers sequentially, according to the CenterID.
+Finds all penguins who are willing to go to the center to register and are on WaitingList.
+Sorts them primarily by PenguinPriority and secondarily by RegistrationID.
+Registers the first FreeVaccines penguins for the nearest Time when it suits them (based on ValidTimes; one center vaccinates one penguin for about 10 minutes)
+For each penguin he adds to the center's timetable, freeVaccines is reduced by 1.
+Penguins that have a timetable date will be removed from the WaitingList.
+ADVANCED QUESTIONS FROM THE ADVANCED SECTION
+“FINDAPPOINTMENTS ARG ARG…” - a query that lists all penguins sorted by Time and then RegistrationID, meeting ARG conditions. ARG can take several forms:
+
+"ID PenguinID" - lists when a penguin is ordered.
+“DATE YYYY MM DD” - lists all ordered on the given day.
+"CENTER CenterID" - lists all ordered by the center.
+“CENTERDATE CenterID YYYY MM DD” - all ordered to the center on a given date.
+Statements will be in the form “RegistrationID | CenterID | Time”. Be especially careful not to duplicate rows in your listing. Now let's demonstrate the query “FINDAPPOINTMENTS ID 0 DATE 2021 2 1 CENTER 2 CENTERDATE 3 2021 3 1” which prints:
+
+when the penguin with ID 0 should arrive.
+all penguins to be vaccinated on 1 February 2021.
+all penguins to be vaccinated in the center with ID 2.
+all penguins to be vaccinated at ID 3 center on 1 March 2021.
+“FINDLOGGEDVACCINATIONS ARG ARG…” - a query that lists all penguins sorted by PenguinID, RegistrationID, meeting ARG conditions. ARG can take several forms:
+
+"ID PenguinID" - lists when the penguin was vaccinated.
+“DATE YYYY MM DD” - lists all vaccinated on the day.
+"CENTER CenterID" - lists all vaccinated in the center.
+“CENTERDATE CenterID YYYY MM DD” - all vaccinated in the center on a given date.
+“LEVEL VaccinationNumber” - all who have been vaccinated at least VaccinationNumber times.
+Statements will be in the form “PenguinID | RegistrationID | VaccinationNumber | CenterID | Time”. Be especially careful not to duplicate rows in your listing. Now let's demonstrate the query “FINDLOGGEDVACCINATIONS ID 0 DATE 2021 2 1 CENTER 2 CENTERDATE 3 2021 3 1 LEVEL 2” which prints:
+
+when a penguin with ID 0 was vaccinated.
+all penguins vaccinated on 1 February 2021.
+all penguins vaccinated in the center with ID 2.
+all penguins vaccinated at the ID 3 center on March 1, 2021.
+all penguins that have been vaccinated at least 2 times.
+"GIVESTATISTICS" - lists simple statistics about the system:
+
+"So far {count} of penguins have been vaccinated." - how many penguins have been vaccinated at least once with the system.
+“Best vaccinated district {District}” - the area with the most fully vaccinated penguins.
+“Favorite district {District}” - the area with the most vaccinations.
+"Favorite center {CenterID}" - the center with the most vaccinations.
+"First fully vaccinated {PenguinID}" - the first vaccinated penguin.
+“Favorite day {Date}” - the day on which most penguins were or are planned to be vaccinated.
+“Favorite weekday {0-6}” - the day of the week when the most penguins were or are planned to be vaccinated (each vaccination is counted).
+Replace {…} with a specific single result (if there are more than one, choose the one that is smaller).
+
+Write each item on a new line.
+ADDITIONAL REQUIREMENTS
+All dumps will be written to the file specified by the printFile argument opened on WRITE.
+Each listing will always be on a new line.
+During the work, it will be possible to change any files to the list using the query "CHANGEFILE printFile" - specified by the path to the file.
+Close each working file when you stop working with it, that is, before the change file function, you change the file.
+The system should be created using SQL alchemy.
+I demand strict adherence to the types listed in the ERD diagram, as SQL alchemy supports them all.
+since no PDF is submitted, I request a clearly annotated solution.
